@@ -10,6 +10,7 @@ class TestMarkdownifyProject(unittest.TestCase):
     def test_do_clean(self):
         ui = mock.MagicMock()
         ui.options = struct.Struct({'skip_clean': False})
+        # TODO(fixme) specify the dir that contains the jinja template
         project = markdownify_full.Project('project', 'base_dir', None)
         project.problems = []
         project.Clean = mock.MagicMock()
