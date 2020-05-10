@@ -33,7 +33,7 @@
 }} | {{
     emoji(problem.judge)
 }}
-{% endfor %}
+{%- endfor %}
 
 
 ## Environments

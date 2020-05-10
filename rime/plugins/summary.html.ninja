@@ -34,7 +34,7 @@
 }} </td><td {{ bg(problem.input_state.status) }}> {{
     problem.input_state.detail
 }} </td><td {{ bg(problem.output_state.status) }}> {{
-    problem.output_state.detailo
+    problem.output_state.detail
 }} </td><td {{ bg(problem.validator) }}> {{
     cell(problem.validator)
 }} </td><td {{ bg(problem.judge) }}> {{
@@ -81,7 +81,6 @@
 {% for problem in problems %}
 <h3>{{ problem.title }}</h3>
 <table class="table">
-
 <thead>
 <tr><th>testcase</th><th>in</th><th>diff</th><th>md5</th><th> {% for sol in problem.solutions -%} {{
     sol.name | replace('-', ' ') | replace('_', ' ')

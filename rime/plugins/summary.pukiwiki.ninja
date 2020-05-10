@@ -1,0 +1,89 @@
+{% autoescape off %}
+
+{%- macro bg(type) -%}
+{%- if type == ItemState.GOOD -%} BGCOLOR(#ccffcc):
+{%- elif type == ItemState.NOTBAD -%} BGCOLOR(#ffffcc):
+{%- elif type == ItemState.BAD -%} BGCOLOR(#ffcccc):
+{%- else -%} BGCOLOR(#cccccc): {%- endif -%}
+{%- endmacro -%}
+
+{%- macro cell(type) -%}
+{%- if type == ItemState.GOOD -%} &#x25cb;
+{%- elif type == ItemState.NOTBAD -%} &#x25b3;
+{%- elif type == ItemState.BAD -%} &#xd7;
+{%- else -%} - {%- endif -%}
+{%- endmacro -%}
+
+
+#contents
+このセクションは summarize plugin により自動生成されています (rev.{{ system.rev }}, uploaded by {{ system.username }} @ {{ system.hostname }})
+
+** Summary
+|||CENTER:|CENTER:|CENTER:|CENTER:|CENTER:|c
+|~問題|~担当|~解答|~入力|~出力|~入検|~出検|
+{%- for problem in problems %}
+|[[{{
+    problem.title }}>{{ problem.wiki_name
+}}]]| {{
+    problem.assignees
+}} |{{
+    bg(problem.solution_state.status) }} {{ problem.solution_state.detail
+}} |{{
+    bg(problem.input_state.status) }} {{ problem.input_state.detail
+}} |{{
+    bg(problem.output_state.status) }} {{ problem.output_state.detail
+}} |{{
+    bg(problem.validator) }} {{ cell(problem.validator)
+}} |{{
+    bg(problem.judge) }} {{ cell(problem.judge)
+}} |
+{%- endfor %}
+
+** Environments
+{% for env in environments %}
+:{{ env.type }}:|{{ env.detail }}
+{% endfor %}
+
+{% if errors|length > 0 or warnings|length > 0 %}
+** Error Messages
+{% if errors|length > 0 %}
+:COLOR(red):ERROR:|
+{%- for error in errors %}
+--{{ error }}
+{%- endfor %}
+{% endif %}
+
+{% if warnings|length > 0 %}
+:COLOR(yellow):WARNING:|
+{%- for warning in warnings %}
+--{{ warning }}
+{%- endfor %}
+{% endif %}
+{% endif %}
+
+** Detail
+{% for problem in problems %}
+***{{ problem.title }}
+|CENTER:~testcase|CENTER:~in|CENTER:~diff|CENTER:~md5{% for sol in problem.solutions -%}|CENTER:~{{
+    sol.name | replace('-', ' ') | replace('_', ' ')
+}} {% endfor -%}|CENTER:~Comments|h
+|LEFT:|RIGHT:|RIGHT:|LEFT:{% for _ in range(problem.solutions|length) -%} |RIGHT: {%- endfor %}|LEFT:|c
+{%- for case in problem.testcases %}
+|{{
+    case.name | replace('-', ' ') | replace('_', ' ')
+}} | {{
+    case.insize
+}} | {{
+    case.outsize
+}} | {{
+    case.md5
+}} {% for sol in problem.solutions -%} |{{ bg(sol.verdicts[case.name].status) }} {{
+    sol.verdicts[case.name].detail
+}} {% endfor -%} | {{
+    case.comment | replace('\n', '<br>')
+}}|
+{%- endfor %}
+{% endfor %}
+
+
+{% endautoescape %}

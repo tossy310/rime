@@ -239,4 +239,5 @@ def GenerateProblemSummary(problem, testset_results):
         },
         'validator': validator_state,
         'judge': judge_state,
+        'wiki_name': SafeUnicode(problem.wiki_name) or 'No Wiki Name',
     }
