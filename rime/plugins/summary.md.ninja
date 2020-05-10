@@ -10,7 +10,7 @@
 
 # Project Status
 
-このファイルは markdownify_full plugin により自動生成されています (rev.{{ system.rev }}, uploaded by {{ system.username }} @ {{ system.hostname }})
+このファイルは summarize plugin により自動生成されています (rev.{{ system.rev }}, uploaded by {{ system.username }} @ {{ system.hostname }})
 
 
 ## Summary

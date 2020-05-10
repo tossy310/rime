@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
-import hashlib
-import sys
-import socket
 import getpass
+import hashlib
+import os
+import socket
+import sys
 
-from itertools import groupby
 from enum import Enum
+from itertools import groupby
 
 if sys.version_info[0] == 2:
     import commands as builtin_commands  # NOQA
@@ -22,6 +22,12 @@ from rime.basic import test  # NOQA
 
 class ItemState(Enum):
     GOOD, NOTBAD, BAD, NA = range(4)
+
+
+def SafeUnicode(s):
+    if sys.version_info.major == 2 and not isinstance(s, unicode):  # NOQA
+        s = s.decode('utf-8')
+    return s
 
 
 def GetFileSize(dir, filename):
@@ -38,7 +44,7 @@ def GetFileHash(dir, filename):
         f = open(filepath)
         r = f.read()
         f.close()
-        return hashlib.md5(r.encode('utf-8')).hexdigest()
+        return hashlib.md5(SafeUnicode(r).encode('utf-8')).hexdigest()
     else:
         return ''
 
@@ -49,7 +55,7 @@ def GetSummaryFileComment(dir, filename):
         f = open(filepath)
         r = f.read().strip()
         f.close()
-        return r
+        return SafeUnicode(r)
     else:
         return ''
 
@@ -65,6 +71,10 @@ def GetTestCaseState(result):
 
 
 def GenerateSummary(results, ui):
+    """Generate an object for project summary from an array of TestsetResult.
+
+    """
+
     system = {
         'rev': builtin_commands.getoutput(
             'git show -s --oneline').replace('\n', ' ').replace('\r', ' '),
@@ -102,7 +112,7 @@ def GenerateSummary(results, ui):
         }]
 
     # Generate content.
-    problems = [GenerateSummaryOne(k, g) 
+    problems = [GenerateProblemSummary(k, g)
                 for k, g in groupby(results, lambda k: k.problem)]
 
     return {
@@ -113,8 +123,12 @@ def GenerateSummary(results, ui):
         'warnings': ui.errors.warnings if ui.errors.HasWarning() else []
     }
 
-def GenerateSummaryOne(problem, testset_results):
-    testset_results = list(sorted(testset_results, key=lambda x: x.solution.name))
+
+def GenerateProblemSummary(problem, testset_results):
+    testset_results = list(
+        sorted(
+            testset_results,
+            key=lambda x: x.solution.name))
 
     # Get test results from each testset (i.e. per solution)
     solutions = []
@@ -162,7 +176,7 @@ def GenerateSummaryOne(problem, testset_results):
     num_corrects = len(correct_solution_results)
     num_incorrects = num_solutions - num_corrects
     num_agreed = len([result for result in correct_solution_results
-                        if result.expected])
+                      if result.expected])
     need_custom_judge = problem.need_custom_judge
 
     # Solutions:
@@ -207,10 +221,10 @@ def GenerateSummaryOne(problem, testset_results):
 
     # Done.
     return {
-        'title': problem.title or 'No Title',
+        'title': SafeUnicode(problem.title) or 'No Title',
         'solutions': solutions,
         'testcases': testcases,
-        'assignees': assignees,
+        'assignees': SafeUnicode(assignees),
         'solution_state': {
             'status': solutions_state,
             'detail': '%d+%d' % (num_corrects, num_incorrects),

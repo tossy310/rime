@@ -19,7 +19,7 @@ from rime.plugins import summary
 
 class Project(targets.registry.Project):
     @taskgraph.task_method
-    def Summarize(self, ui):
+    def Summarize(self, ui, filename):
         if not ui.options.skip_clean:
             yield self.Clean(ui)
 
@@ -29,13 +29,14 @@ class Project(targets.registry.Project):
 
         jinja_env = Environment(loader=FileSystemLoader(
             os.path.join(self.base_dir, 'rime', 'plugins'), encoding='utf8'))
-        template = jinja_env.get_template('summary.md.ninja')
+        template = jinja_env.get_template(filename + '.ninja')
         template.globals['ItemState'] = summary.ItemState
 
         content = template.render(**summ)
-
-        codecs.open(os.path.join(self.base_dir, 'summary.md'),
-            'w', 'utf8').write(content)
+        codecs.open(
+            os.path.join(self.base_dir, filename),
+            'w',
+            'utf8').write(content)
 
         yield None
 
@@ -54,17 +55,34 @@ class Summarize(rime_commands.CommandBase):
         ))
 
     def Run(self, obj, args, ui):
-        if args:
+        if not isinstance(obj, Project):
+            ui.console.PrintError(
+                'summary plugin is not supported for the specified target.')
+            return None
+
+        if not args or len(args) != 1:
             ui.console.PrintError(
                 'Extra argument passed to summary command!')
             return None
 
-        if isinstance(obj, Project):
-            return obj.Summarize(ui)
+        template = self._OptionToFileName(args[0])
+        if template is None:
+            ui.console.PrintError(
+                'Please specify the correct output type!')
 
-        ui.console.PrintError(
-            'summary plugin is not supported for the specified target.')
-        return None
+        return obj.Summarize(ui, template)
+
+    def _OptionToFileName(self, opt):
+        if opt == 'html':
+            return 'summary.html'
+        elif opt == 'markdown' or opt == 'md':
+            return 'summary.md'
+        # elif opt == 'pukiwiki' or opt == 'wiki':
+        #     return 'pukiwiki.md'
+        # elif opt == 'test':
+        #     return 'test.txt'
+        else:
+            return None
 
 
 targets.registry.Override('Project', Project)
