@@ -2,4 +2,5 @@
 
 ## You can load plugins here.
 use_plugin('wikify')
-use_plugin('summarize')
+use_plugin('htmlify_full')
+use_plugin('markdownify_full')

@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import codecs
-import re
-import sys
 import os
 import os.path
+import re
+import sys
 
 
-from jinja2 import Environment
-from jinja2 import FileSystemLoader
 from six.moves import urllib
 
 import rime.basic.targets.project  # NOQA
@@ -48,16 +46,10 @@ class Project(targets.registry.Project):
             yield self.Clean(ui)
 
         results = yield self.Test(ui)
-
-        summ = summary.GenerateSummary(results, ui)
-
-        jinja_env = Environment(loader=FileSystemLoader(
-            os.path.join(self.base_dir, 'rime', 'plugins'), encoding='utf8'))
-        template = jinja_env.get_template(filename + '.ninja')
-        template.globals['ItemState'] = summary.ItemState
-
-        content = template.render(**summ)
-        #TODO branch whether to output file or to upload wiki.
+        template_file = os.path.join(
+            self.base_dir, 'rime', 'plugins', filename + '.ninja')
+        content = summary.GenerateSummary(results, template_file, ui)
+        # TODO(fixme) branch whether to output file or to upload wiki.
         codecs.open(
             os.path.join(self.base_dir, filename),
             'w',
@@ -109,19 +101,6 @@ class Project(targets.registry.Project):
             url, urllib.parse.urlencode(update_params).encode(encoding))
 
 
-class Problem(targets.registry.Problem):
-    def PreLoad(self, ui):
-        super(Problem, self).PreLoad(ui)
-        base_problem = self.exports['problem']
-
-        def _problem(wiki_name, assignees, need_custom_judge, **kwargs):
-            self.wiki_name = wiki_name
-            self.assignees = assignees
-            self.need_custom_judge = need_custom_judge
-            return base_problem(**kwargs)
-        self.exports['problem'] = _problem
-
-
 class Summarize(rime_commands.CommandBase):
     def __init__(self, parent):
         super(Summarize, self).__init__(
@@ -168,6 +147,5 @@ class Summarize(rime_commands.CommandBase):
 
 
 targets.registry.Override('Project', Project)
-targets.registry.Override('Problem', Problem)
 
 rime_commands.registry.Add(Summarize)

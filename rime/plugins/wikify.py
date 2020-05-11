@@ -1,21 +1,23 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from rime.core import commands as rime_commands  # NOQA
+
+import rime.basic.targets.problem
+import rime.basic.targets.project  # NOQA
+from rime.core import commands as rime_commands
 
 
 class Wikify(rime_commands.CommandBase):
     def __init__(self, parent):
-        self.msg = 'This command is deprecated. Use `rime summarize pukiwiki` instead.'
         super(Wikify, self).__init__(
-            'wikify_full',
+            'wikify',
             '',
-            self.msg,
+            'Wikify is deprecated. Please use wikify_full.',
             '',
             parent)
 
     def Run(self, obj, args, ui):
-        ui.console.PrintError(self.msg)
+        ui.console.PrintError('Wikify is deprecated. Please use wikify_full.')
         return None
 
 

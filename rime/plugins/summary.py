@@ -10,6 +10,9 @@ import sys
 from enum import Enum
 from itertools import groupby
 
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
+
 if sys.version_info[0] == 2:
     import commands as builtin_commands  # NOQA
 else:
@@ -70,7 +73,17 @@ def GetTestCaseState(result):
         return {'status': ItemState.BAD, 'detail': str(result.verdict)}
 
 
-def GenerateSummary(results, ui):
+def GenerateSummary(results, template_file, ui):
+    (dirname, basename) = os.path.split(template_file)
+    jinja_env = Environment(loader=FileSystemLoader(dirname, encoding='utf8'))
+    template = jinja_env.get_template(basename)
+    template.globals['ItemState'] = ItemState
+
+    summ = GenerateProjectSummary(results, ui)
+    return template.render(**summ)
+
+
+def GenerateProjectSummary(results, ui):
     """Generate an object for project summary from an array of TestsetResult.
 
     """

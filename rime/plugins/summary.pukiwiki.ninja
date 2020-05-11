@@ -80,7 +80,7 @@
 }} {% for sol in problem.solutions -%} |{{ bg(sol.verdicts[case.name].status) }} {{
     sol.verdicts[case.name].detail
 }} {% endfor -%} | {{
-    case.comment | replace('\n', '<br>')
+    case.comment | replace('\n', '&br;') | replace('|', '&#x7c;')
 }}|
 {%- endfor %}
 {% endfor %}
